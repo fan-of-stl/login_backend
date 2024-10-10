@@ -24,7 +24,7 @@ server.use('/', (req, res)=>{
 })
 
 
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 9000
 
 server.listen(PORT, ()=>{
     console.log(`Running on port ${PORT}`);
