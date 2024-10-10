@@ -1,7 +1,7 @@
 
-# Movie Application Backend
+# Application Backend
 
-This is the backend for a movie application built using Node.js, Express, and MongoDB. It includes user registration and login functionality with JWT authentication and data validation.
+This is the backend for a application built using Node.js, Express, and MongoDB. It includes user registration and login functionality with JWT authentication and data validation.
 
 ## Features
 
