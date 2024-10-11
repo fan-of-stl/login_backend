@@ -87,7 +87,12 @@ This is the backend for a application built using Node.js, Express, and MongoDB.
 
 ### Protected Route
 
-- **Endpoint**: `GET /api/dashboard`
+- **Endpoints**: 
+`GET /api/dashboard`, 
+`GET /api/all-user`, 
+`GET /api/user`, 
+`GET /api/update`, 
+`GET /api/delete`, 
 - **Authorization**: Bearer token required in the header.
 
 ## Validation

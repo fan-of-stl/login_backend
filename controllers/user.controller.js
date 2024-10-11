@@ -1,7 +1,10 @@
 const User = require("../models/user.model");
 const generateAccessToken = require("../utilities/generateAcessToken");
 const SERVER_MESSAGES = require("../utilities/server_messages");
-const { userValidationSchema, loginValidationSchema } = require("../utilities/validationSchema");
+const {
+  userValidationSchema,
+  loginValidationSchema,
+} = require("../utilities/validationSchema");
 
 const registrationController = async (req, res) => {
   try {
@@ -11,7 +14,8 @@ const registrationController = async (req, res) => {
       return res.status(400).json({ error: error.details[0].message });
     }
 
-    const { name, email, password, username, phonenumber, profession } = req.body;
+    const { name, email, password, username, phonenumber, profession } =
+      req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -61,7 +65,7 @@ const loginController = async (req, res) => {
       return res.status(400).json({ message: SERVER_MESSAGES.LOGIN_ERROR });
     }
 
-    const token = generateAccessToken(user); 
+    const token = generateAccessToken(user);
     return res.status(200).json({ token, message: "Logged In successfully" });
   } catch (err) {
     console.error("Error during login:", err);
@@ -70,11 +74,99 @@ const loginController = async (req, res) => {
 };
 
 const protectedDashboard = async (req, res) => {
-  return res.status(200).json({ message: "Welcome to dashboard", user: req.user });
+  return res
+    .status(200)
+    .json({ message: "Welcome to dashboard", user: req.user });
+};
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select(
+      "name username phonenumber profession"
+    );
+
+    if (!users.length) {
+      return res.status(404).json({ message: "No users found." });
+    }
+
+    return res.status(200).json({ users });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.user;
+    const { name, email, password, profession, phonenumber } = req.body;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (profession) user.profession = profession;
+    if (phonenumber) user.phonenumber = phonenumber;
+
+    if (password) {
+      user.password = password;
+    }
+
+    const updatedUser = await user.save();
+
+    const { password: _, ...userData } = updatedUser.toObject();
+    return res.status(200).json({ user: userData });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getUserById = async (req, res) => {
+  try {
+    const { id } = req.user;
+
+    const user = await User.findById(id);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    return res.status(200).json({
+      message: "Authenticated user data retrieved successfully.",
+      user,
+    });
+  } catch (error) {
+    console.error("Error retrieving authenticated user:", error);
+
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+const deleteUserById = async (req, res) => {
+  try {
+    const { id } = req.user;
+
+    const user = await User.findById(id);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    await User.findByIdAndDelete(id);
+
+    return res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
 };
 
 module.exports = {
   registrationController,
   loginController,
   protectedDashboard,
+  getAllUsers,
+  updateUser,
+  getUserById,
+  deleteUserById
 };
